@@ -1,0 +1,13 @@
+{
+  "bindings": [
+    {
+      "name": "myTimer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "%REENGAGE_SCHEDULE%",
+      "runOnStartup": false
+    }
+  ],
+  "scriptFile": "../dist/reengage/index.js"
+}
+

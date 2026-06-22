@@ -1,0 +1,13 @@
+{
+  "bindings": [
+    {
+      "name": "myTimer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "%FOLLOWUP_SCHEDULE%",
+      "runOnStartup": false
+    }
+  ],
+  "scriptFile": "../dist/followup/index.js"
+}
+

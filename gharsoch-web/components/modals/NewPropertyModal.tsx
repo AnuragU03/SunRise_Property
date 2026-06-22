@@ -1,0 +1,383 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+
+import { savePropertyAction, updatePropertyAction } from '@/app/actions/properties'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+import type { SerializedProperty } from '@/lib/services/propertyService'
+import { toast } from '@/lib/toast'
+import { getAgentVisual } from '@/lib/ui/agentVisuals'
+
+const TYPE_OPTIONS = ['1BHK', '2BHK', '3BHK', '4BHK', 'Villa']
+const STATUS_OPTIONS = [
+  { label: 'Available', value: 'available' },
+  { label: 'In negotiation', value: 'negotiation' },
+  { label: 'Sold', value: 'sold' },
+]
+
+type PropertyFormState = {
+  id: string
+  title: string
+  builder: string
+  type: string
+  city: string
+  location: string
+  price: string
+  area_sqft: string
+  bedrooms: string
+  status: string
+  description: string
+  amenities: string
+  images: string
+  // Call-corpus pitch fields — what the voice agent quotes on calls
+  carpet_area_sqft: string
+  floor: string
+  facing: string
+  ask_price: string
+  close_price_min: string
+  close_price_max: string
+  maintenance_monthly: string
+  furnishing: string
+  balconies: string
+  seller_urgency: string
+  rent_monthly: string
+}
+
+function buildInitialState(property?: Partial<SerializedProperty> | null, entityId?: string): PropertyFormState {
+  return {
+    id: entityId || property?._id || '',
+    title: property?.title || '',
+    builder: property?.builder || '',
+    type: property?.type || '3BHK',
+    city: property?.city || '',
+    location: property?.location || '',
+    price: property?.price ? String(property.price) : '',
+    area_sqft: property?.area_sqft ? String(property.area_sqft) : '',
+    bedrooms: property?.bedrooms ? String(property.bedrooms) : '',
+    status: property?.status || 'available',
+    description: property?.description || '',
+    amenities: Array.isArray(property?.amenities) ? property!.amenities.join(', ') : '',
+    images: Array.isArray(property?.images) ? property!.images.join(', ') : '',
+    carpet_area_sqft: (property as any)?.carpet_area_sqft ? String((property as any).carpet_area_sqft) : '',
+    floor: (property as any)?.floor ? String((property as any).floor) : '',
+    facing: (property as any)?.facing || '',
+    ask_price: (property as any)?.ask_price ? String((property as any).ask_price) : '',
+    close_price_min: (property as any)?.close_price_min ? String((property as any).close_price_min) : '',
+    close_price_max: (property as any)?.close_price_max ? String((property as any).close_price_max) : '',
+    maintenance_monthly: (property as any)?.maintenance_monthly ? String((property as any).maintenance_monthly) : '',
+    furnishing: (property as any)?.furnishing || '',
+    balconies: (property as any)?.balconies != null ? String((property as any).balconies) : '',
+    seller_urgency: (property as any)?.seller_urgency || '',
+    rent_monthly: (property as any)?.rent_monthly ? String((property as any).rent_monthly) : '',
+  }
+}
+
+export function NewPropertyModal({
+  open,
+  onClose,
+  initialValues,
+  initialData,
+  entityId,
+}: {
+  open: boolean
+  onClose: () => void
+  initialValues?: SerializedProperty | null
+  initialData?: Partial<SerializedProperty> | null
+  entityId?: string
+}) {
+  const router = useRouter()
+  const resolvedInitial = initialData ?? initialValues ?? null
+  const [form, setForm] = useState<PropertyFormState>(buildInitialState(resolvedInitial, entityId))
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  // Voice-agent pitch fields are collapsed by default — a broker adding a listing
+  // shouldn't have to fill carpet/floor/facing/close-band up front. Optional.
+  const [showPitch, setShowPitch] = useState(false)
+  const MatchmakerIcon = getAgentVisual('matchmaker').icon
+  const isEditMode = Boolean(entityId || resolvedInitial?._id)
+
+  useEffect(() => {
+    if (open) {
+      setForm(buildInitialState(resolvedInitial, entityId))
+      setError('')
+      setShowPitch(false)
+    }
+  }, [entityId, open, resolvedInitial])
+
+  return (
+    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
+      <DialogContent className="border-none bg-transparent p-0 shadow-none sm:max-w-[560px]">
+        <div className="modal-card">
+          <div className="modal-head">
+            <h3>{isEditMode ? 'Edit property' : 'New property'}</h3>
+            <button type="button" className="drawer-close" onClick={onClose}>
+              Close
+            </button>
+          </div>
+
+          <form
+            onSubmit={async (event) => {
+              event.preventDefault()
+              setSubmitting(true)
+              setError('')
+
+              const formData = new FormData(event.currentTarget)
+              const result = isEditMode ? await updatePropertyAction(formData) : await savePropertyAction(formData)
+
+              setSubmitting(false)
+
+              const succeeded = isEditMode ? result.ok : result.success
+              if (!succeeded) {
+                setError(result.error || 'Failed to save property.')
+                return
+              }
+
+              toast.success(isEditMode ? 'Property updated' : 'Property added · Matchmaker dispatched')
+              router.refresh()
+              onClose()
+            }}
+          >
+            <div className="modal-body">
+              <input type="hidden" name="id" value={form.id} />
+              {isEditMode ? <input type="hidden" name="images" value={form.images} /> : null}
+              {error ? <div className="mb-3 text-sm font-medium text-red">{error}</div> : null}
+
+              <div className="field">
+                <label>Title</label>
+                <input
+                  name="title"
+                  value={form.title}
+                  onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
+                  placeholder="Prestige Lakeside Habitat"
+                  required
+                />
+              </div>
+
+              {isEditMode ? null : (
+                <div className="field-row">
+                  <div className="field">
+                    <label>Builder</label>
+                    <input
+                      name="builder"
+                      value={form.builder}
+                      onChange={(event) => setForm((current) => ({ ...current, builder: event.target.value }))}
+                      placeholder="Prestige Group"
+                      required
+                    />
+                  </div>
+                  <div className="field">
+                    <label>Type</label>
+                    <select
+                      name="type"
+                      value={form.type}
+                      onChange={(event) => setForm((current) => ({ ...current, type: event.target.value }))}
+                    >
+                      {TYPE_OPTIONS.map((type) => (
+                        <option key={type} value={type}>{type}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {isEditMode ? null : (
+                <div className="field-row">
+                  <div className="field">
+                    <label>City</label>
+                    <input
+                      name="city"
+                      value={form.city}
+                      onChange={(event) => setForm((current) => ({ ...current, city: event.target.value }))}
+                      placeholder="Mumbai"
+                      required
+                    />
+                  </div>
+                  <div className="field">
+                    <label>Area (sqft)</label>
+                    <input
+                      name="area_sqft"
+                      value={form.area_sqft}
+                      onChange={(event) => setForm((current) => ({ ...current, area_sqft: event.target.value }))}
+                      placeholder="1840"
+                      type="number"
+                      min="0"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="field-row">
+                <div className="field">
+                  <label>Location</label>
+                  <input
+                    name="location"
+                    value={form.location}
+                    onChange={(event) => setForm((current) => ({ ...current, location: event.target.value }))}
+                    placeholder="Andheri West"
+                    required
+                  />
+                </div>
+                <div className="field">
+                  <label>Price (Rs)</label>
+                  <input
+                    name="price"
+                    value={form.price}
+                    onChange={(event) => setForm((current) => ({ ...current, price: event.target.value }))}
+                    placeholder="14000000"
+                    type="number"
+                    min="0"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="field-row">
+                <div className="field">
+                  <label>{isEditMode ? 'BHK' : 'Bedrooms'}</label>
+                  <input
+                    name={isEditMode ? 'bhk' : 'bedrooms'}
+                    value={form.bedrooms}
+                    onChange={(event) => setForm((current) => ({ ...current, bedrooms: event.target.value }))}
+                    placeholder="3"
+                    type="number"
+                    min="0"
+                  />
+                </div>
+                <div className="field">
+                  <label>Status</label>
+                  <select
+                    name="status"
+                    value={form.status}
+                    onChange={(event) => setForm((current) => ({ ...current, status: event.target.value }))}
+                  >
+                    {STATUS_OPTIONS.map((status) => (
+                      <option key={status.value} value={status.value}>{status.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Voice-agent pitch fields — what the agent quotes on calls (call-corpus). Collapsed by default. */}
+              <div style={{ borderTop: '1px solid var(--hairline)', paddingTop: 12, marginTop: 4 }}>
+                <button
+                  type="button"
+                  onClick={() => setShowPitch(!showPitch)}
+                  className="flex items-center gap-2 text-sm text-ink-2 hover:text-ink transition-colors"
+                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}
+                >
+                  {showPitch ? '▼' : '▶'} Voice-agent pitch details (optional)
+                </button>
+              </div>
+              {showPitch && (
+              <>
+              <div className="field-row">
+                <div className="field">
+                  <label>Carpet Area (sq ft)</label>
+                  <input name="carpet_area_sqft" type="number" min="0" value={form.carpet_area_sqft}
+                    onChange={(e) => setForm((c) => ({ ...c, carpet_area_sqft: e.target.value }))} placeholder="723" />
+                </div>
+                <div className="field">
+                  <label>Floor</label>
+                  <input name="floor" type="number" min="0" value={form.floor}
+                    onChange={(e) => setForm((c) => ({ ...c, floor: e.target.value }))} placeholder="27" />
+                </div>
+              </div>
+              <div className="field-row">
+                <div className="field">
+                  <label>Facing</label>
+                  <input name="facing" value={form.facing}
+                    onChange={(e) => setForm((c) => ({ ...c, facing: e.target.value }))} placeholder="north-east" />
+                </div>
+                <div className="field">
+                  <label>Balconies</label>
+                  <input name="balconies" type="number" min="0" value={form.balconies}
+                    onChange={(e) => setForm((c) => ({ ...c, balconies: e.target.value }))} placeholder="0" />
+                </div>
+              </div>
+              <div className="field-row">
+                <div className="field">
+                  <label>Ask Price (Rs)</label>
+                  <input name="ask_price" type="number" min="0" value={form.ask_price}
+                    onChange={(e) => setForm((c) => ({ ...c, ask_price: e.target.value }))} placeholder="20500000" />
+                </div>
+                <div className="field">
+                  <label>Close Band (Rs min–max)</label>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <input name="close_price_min" type="number" min="0" value={form.close_price_min}
+                      onChange={(e) => setForm((c) => ({ ...c, close_price_min: e.target.value }))} placeholder="18500000" />
+                    <input name="close_price_max" type="number" min="0" value={form.close_price_max}
+                      onChange={(e) => setForm((c) => ({ ...c, close_price_max: e.target.value }))} placeholder="19000000" />
+                  </div>
+                </div>
+              </div>
+              <div className="field-row">
+                <div className="field">
+                  <label>Maintenance (Rs/month)</label>
+                  <input name="maintenance_monthly" type="number" min="0" value={form.maintenance_monthly}
+                    onChange={(e) => setForm((c) => ({ ...c, maintenance_monthly: e.target.value }))} placeholder="8000" />
+                </div>
+                <div className="field">
+                  <label>Rent (Rs/month, if rental)</label>
+                  <input name="rent_monthly" type="number" min="0" value={form.rent_monthly}
+                    onChange={(e) => setForm((c) => ({ ...c, rent_monthly: e.target.value }))} placeholder="80000" />
+                </div>
+              </div>
+              <div className="field-row">
+                <div className="field">
+                  <label>Furnishing</label>
+                  <input name="furnishing" value={form.furnishing}
+                    onChange={(e) => setForm((c) => ({ ...c, furnishing: e.target.value }))} placeholder="3 ACs, modular kitchen, basic fittings" />
+                </div>
+                <div className="field">
+                  <label>Seller Urgency</label>
+                  <input name="seller_urgency" value={form.seller_urgency}
+                    onChange={(e) => setForm((c) => ({ ...c, seller_urgency: e.target.value }))} placeholder="sellers pressed for time" />
+                </div>
+              </div>
+              </>
+              )}
+
+              <div className="field">
+                <label>Amenities</label>
+                <input
+                  name="amenities"
+                  value={form.amenities}
+                  onChange={(event) => setForm((current) => ({ ...current, amenities: event.target.value }))}
+                  placeholder="Clubhouse, pool, gym"
+                />
+              </div>
+
+              <div className="field">
+                <label>Description</label>
+                <textarea
+                  name="description"
+                  rows={3}
+                  value={form.description}
+                  onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
+                  placeholder="Key amenities, possession date, USPs..."
+                />
+              </div>
+
+              <div className="rounded-lg bg-warm-soft px-3 py-2 text-sm text-warm">
+                <span className="inline-flex items-center gap-1.5">
+                  <MatchmakerIcon size={14} strokeWidth={1.75} />
+                  {isEditMode
+                    ? 'Edit mode updates the approved property fields and refreshes the inventory views immediately.'
+                    : 'Matchmaker will scan unmatched leads on save. Lowering the price later dispatches the Price-Drop agent automatically.'}
+                </span>
+              </div>
+            </div>
+
+            <div className="modal-foot">
+              <button type="button" className="btn ghost" onClick={onClose} disabled={submitting}>Cancel</button>
+              <button type="submit" className="btn primary" disabled={submitting}>
+                {submitting ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update property' : 'Create property')}
+              </button>
+            </div>
+          </form>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}

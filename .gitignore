@@ -1,0 +1,226 @@
+# ─── Secrets — NEVER commit ────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ─── Office / confidential docs ────────────────────────────────────────────────
+*.docx
+*.xlsx
+*.pdf
+*BRD*
+*PRD*
+
+# ─── PowerShell local scripts ──────────────────────────────────────────────────
+*.ps1
+
+# ─── Next.js (gharsoch-web subfolder) ─────────────────────────────────────────
+gharsoch-web/.next/
+gharsoch-web/.next-stale*/
+gharsoch-web/out/
+gharsoch-web/build/
+gharsoch-web/standalone/
+
+# ─── Node modules ──────────────────────────────────────────────────────────────
+node_modules/
+gharsoch-web/node_modules/
+
+# ─── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+*.log.*
+gharsoch-web/*.log
+gharsoch-web/.gate*.log
+gharsoch-web/.tmp-*.log
+gharsoch-web/gate-*.log
+gharsoch-web/phase*.log
+gharsoch-web/dev_output.txt
+gharsoch-web/dev_stderr.txt
+gharsoch-web/build_output.txt
+gharsoch-web/auth_state.json
+gharsoch-web/screenshots/
+
+# ─── Azure Functions build output ─────────────────────────────────────────────
+gharsoch-web/azure/functions/local.settings.json
+gharsoch-web/azure/functions/dist/
+gharsoch-web/azure/functions/node_modules/
+gharsoch-web/azure/functions/.azurite/
+gharsoch-web/azure/functions/func_output*.txt
+
+# ─── Misc ──────────────────────────────────────────────────────────────────────
+.DS_Store
+*.pem
+*.tsbuildinfo
+gharsoch-web/next-env.d.ts
+.idea/
+.vscode/
+
+
+# ─── Company-confidential docs ─────────────────────────────────────────────────
+docs/
+
+# ─── Dev/diagnostic scripts (temp, never production) ──────────────────────────
+scripts/diagnose_users.js
+scripts/promote_admin.js
+scripts/promote_admin.js.disabled
+scripts/vapi_mock_test.js
+scripts/test_cosmos.js
+scripts/bulk_upload_leads.js
+# Keep: scripts/create_indexes.js (infra setup)
+# Keep: scripts/init_collections.js (infra setup)
+
+# ─── Data folder (seed/test JSON — not for git) ────────────────────────────────
+data/
+
+# ─── Dependencies ──────────────────────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# ─── Next.js build output ──────────────────────────────────────────────────────
+.next/
+.next-stale*/
+/out/
+/build/
+standalone/
+
+# ─── Testing / Coverage ────────────────────────────────────────────────────────
+/coverage/
+
+# ─── Environment files — NEVER commit secrets ──────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ─── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+gate-*.log
+gate-*-dev.out.log
+gate-*-dev.err.log
+gate-*-verify-dev.out.log
+gate-*-verify-dev.err.log
+.gate*.log
+.tmp-*.log
+phase*.log
+dev_output.txt
+dev_stderr.txt
+build_output.txt
+
+# ─── Misc ──────────────────────────────────────────────────────────────────────
+.DS_Store
+*.pem
+*.tsbuildinfo
+next-env.d.ts
+
+# ─── IDE ───────────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+
+# ─── PowerShell scripts (local dev only) ───────────────────────────────────────
+*.ps1
+
+# ─── Vercel ────────────────────────────────────────────────────────────────────
+.vercel
+
+# ─── Azure Functions ───────────────────────────────────────────────────────────
+azure/functions/local.settings.json
+azure/functions/dist/
+azure/functions/node_modules/
+azure/functions/.azurite/
+azure/functions/func_output*.txt
+
+# ─── Legacy phase docs (local development only) ────────────────────────────────
+PHASE_7_IMPLEMENTATION.md
+PHASE_7_QUICK_START.md
+PHASE_7_TESTING.ts
+
+# ─── Company-confidential docs ─────────────────────────────────────────────────
+docs/
+
+# ─── Dev/diagnostic scripts (temp, never production) ──────────────────────────
+scripts/diagnose_users.js
+scripts/promote_admin.js
+scripts/promote_admin.js.disabled
+scripts/vapi_mock_test.js
+scripts/test_cosmos.js
+scripts/bulk_upload_leads.js
+# Keep: scripts/create_indexes.js (infra setup)
+# Keep: scripts/init_collections.js (infra setup)
+
+# ─── Data folder (seed/test JSON — not for git) ────────────────────────────────
+data/
+
+# Azure Migration Secrets
+appsettings.json
+appsettings_final.json
+functionsettings.json
+*.xml
+*.zip
+
+scratch/
+
+node_modules/
+gharsoch-web/node_modules/
+
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# === Added during V2 migration cleanup ===
+# Scratch / experiments (never commit)
+**/scratch/
+
+# Azure migration artifacts
+*.PublishSettings
+*-publish-profile.xml
+appsettings*.json
+v2-logs*.zip
+v2-logs/
+resources.txt
+
+# Env backups
+.env.backup-*
+**/.env.backup-*
+
+# Stray builds
+**/.next/standalone/.env
+
+backups/
+
+# === Private SaaS planning docs (LOCAL ONLY, never commit) ===
+Prototype/
+**/Prototype/
+docs/internal/
+docs/private/
+*.private.md
+PRD_*.md
+IMPLEMENTATION_PLAN*.md
+implementationSteps*.md
+followUpScript*.md
+warmCall_*.md
+vapi_latest_setup*.md
+humanVoice_*.md
+pythonVsNodejs*.md
+lyzr_*.txt
+
+# === Cursor AI workspace (LOCAL) ===
+.cursor/
+**/.cursor/
+
+# === Local dev storage (replaces Azure Blob when credits exhausted) ===
+uploads/
+archives/
+gharsoch-web/uploads/
+gharsoch-web/archives/
+
+# Local dev/debug artifacts (not for VCS)
+scratch_*.js
+ui_audit_shots/
+.claude/
+gharsoch-web/.codex/run-logs/
+*.pid

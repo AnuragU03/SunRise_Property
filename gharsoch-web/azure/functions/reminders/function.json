@@ -1,0 +1,13 @@
+{
+  "bindings": [
+    {
+      "name": "myTimer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "%REMINDERS_SCHEDULE%",
+      "runOnStartup": false
+    }
+  ],
+  "scriptFile": "../dist/reminders/index.js"
+}
+

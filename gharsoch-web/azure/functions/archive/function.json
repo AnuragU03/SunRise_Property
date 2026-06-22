@@ -1,0 +1,12 @@
+{
+  "bindings": [
+    {
+      "name": "myTimer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "%ARCHIVE_SCHEDULE%",
+      "runOnStartup": false
+    }
+  ],
+  "scriptFile": "../dist/archive/index.js"
+}

@@ -1,0 +1,12 @@
+{
+  "bindings": [
+    {
+      "name": "myTimer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "%CAMPAIGN_SWEEP_SCHEDULE%",
+      "runOnStartup": false
+    }
+  ],
+  "scriptFile": "../dist/campaignsweep/index.js"
+}
